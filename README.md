@@ -1,0 +1,22 @@
+* Data Structures Final
+Chris Hughes
+March 28, 2025
+
+** Question 1
+
+The correct solution is Θ(n2lg n) or O(n2lg n). This is because options A and B would both grow at exponential rate, making them the worst by far. This would be unfeasible to use on a relatively large N as the Cubed numbers increase in size very rapidly. That leaves O(n2lg n), Θ(n2lg n) and O(2n). O(2n) is multiplicative growth while O(n2lg n) and Θ(n2lg n) is logarithmic growth. Logarithmic growth is slower than multiplicative. The Θ and O describe the bounds. O describes the upper bounds while  Θ describes both the upper and lower. O could have the same lower bound as  Θ, but not necessarily. The main reason they are preferable is the logarithmic growth.
+
+** Question 2
+
+*** Scope
+Create a Java Spring application that can handle a large number of bids for an online silent auction. The application must be capable of process a large number of bids and restarting the auction in the event of a tie.
+
+*** Storage
+
+I would store the bids and auctions in a relational database. Using a stateful Java data structure would be not be advisable because the bids would lost if the program shuts down for some reason such as encountering an unrecoverable error. The bids would be placed alogn with a time stamp to track whether or not they were made before the auction end time. This would also greatly simplfy part 2.
+
+*** Bid Processing
+
+To process the bids, I would query the database after the auction closes and place the bids in a Java ArrayList data structure. I would stream the ArrayList to filter out bids below the minimum (IE  =bids.stream().filter(b -> b  >=  minBin);=). I would then use the LocalDateTime =isBefore()= method to filter the stream to find only bids before the end time. Next I would map the values to a list of integers with =map()= and find the max using the =max()= method. instead of returning the bid itself, I would return the bid value and then loop over the list a final time to find the bids that match the highest value. Java streams are processed sequentially, therefore the time complexity of this would be 0(n) for both operations. The application would need to stream the list of winners twice, which would be appropriate for very large numbers of bidders.
+
+It would change only trivially if you wanted to find the most recent winner. You would stream the list winningBids to find the minimum LocalDateTime and that would be the winner. According to the Java Documentation "Time is represented to nanosecond precision." It is possible that for a large number of bids that multiple bids could be placed within the same nanosecond. While this is potentially problematic, it is made somewhat moot by it being far below the tolerance of normal network connections with latencies generally counted in miliseconds. In the proposed solution I use =getFirst()=, which would be based somewhat arbitrarily on what order they were placed in the list from the database query, but I believe it is an acceptable solution  given the constraints of a WAN. I do not think it would be appropriate to set the time on the client side to resolve this as it would be possible for malicious actors to manipulate this value.
